@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Pendiente</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007aff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pendiente">
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f5f5f7;
+        color: #111;
+    }
+
+    .app {
+        max-width: 520px;
+        margin: auto;
+        min-height: 100vh;
+        background: white;
+        padding: 55px 22px 35px;
+    }
+
+    .fecha {
+        color: #777;
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    h1 {
+        font-size: 38px;
+        margin: 0 0 10px;
+    }
+
+    .contador {
+        display: inline-block;
+        background: #f0f4f9;
+        padding: 7px 13px;
+        border-radius: 20px;
+        font-size: 13px;
+        margin-bottom: 28px;
+    }
+
+    #lista {
+        margin-bottom: 25px;
+    }
+
+    .pendiente {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 2px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .check {
+        width: 27px;
+        height: 27px;
+        border: 2px solid #bbb;
+        border-radius: 50%;
+        flex-shrink: 0;
+        cursor: pointer;
+        margin-top: 1px;
+    }
+
+    .check.hecho {
+        background: #007aff;
+        border-color: #007aff;
+        position: relative;
+    }
+
+    .check.hecho::after {
+        content: "✓";
+        color: white;
+        position: absolute;
+        left: 5px;
+        top: 0px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .contenido {
+        flex: 1;
+    }
+
+    .texto {
+        font-size: 17px;
+        line-height: 1.3;
+    }
+
+    .terminado .texto {
+        text-decoration: line-through;
+        color: #999;
+    }
+
+    .hora {
+        font-size: 13px;
+        color: #777;
+        margin-top: 5px;
+    }
+
+    .borrar {
+        border: none;
+        background: transparent;
+        color: #bbb;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0 4px;
+    }
+
+    .agregar {
+        width: 100%;
+        border: none;
+        background: #007aff;
+        color: white;
+        font-size: 17px;
+        font-weight: 600;
+        padding: 15px;
+        border-radius: 13px;
+        cursor: pointer;
+    }
+
+    .finalizados-titulo {
+        margin-top: 28px;
+        padding: 14px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #666;
+        border-top: 1px solid #eee;
+    }
+
+    .modal-fondo {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.35);
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 520px;
+        background: white;
+        border-radius: 20px 20px 0 0;
+        padding: 25px 22px 35px;
+    }
+
+    .modal h2 {
+        margin-top: 0;
+        font-size: 23px;
+    }
+
+    input {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        font-size: 17px;
+        outline: none;
+        margin-bottom: 14px;
+    }
+
+    input:focus {
+        border-color: #007aff;
+    }
+
+    .aviso {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 8px 0;
+    }
+
+    input[type="datetime-local"] {
+        font-size: 15px;
+    }
+
+    .guardar {
+        width: 100%;
+        border: none;
+        background: #007aff;
+        color: white;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 17px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .cancelar {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: #007aff;
+        padding: 14px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    .vacio {
+        text-align: center;
+        color: #999;
+        padding: 35px 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="fecha" id="fecha"></div>
+
+    <h1>Hoy</h1>
+
+    <div class="contador" id="contador">
+        0 pendientes · 0 terminados
+    </div>
+
+    <div id="lista"></div>
+
+    <button class="agregar" onclick="abrirModal()">
+        ＋ Agregar pendiente
+    </button>
+
+    <div class="finalizados-titulo">
+        Finalizados de hoy
+    </div>
+
+    <div id="finalizados"></div>
+
+</div>
+
+<div class="modal-fondo" id="modalFondo">
+
+    <div class="modal">
+
+        <h2>¿Qué tienes pendiente?</h2>
+
+        <input
+            id="nuevoPendiente"
+            type="text"
+            placeholder="Escribe tu pendiente..."
+            autocomplete="off"
+        >
+
+        <div class="aviso">🔔 Avisarme (opcional)</div>
+
+        <input
+            id="fechaAviso"
+            type="datetime-local"
+        >
+
+        <button class="guardar" onclick="guardarPendiente()">
+            Guardar
+        </button>
+
+        <button class="cancelar" onclick="cerrarModal()">
+            Cancelar
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
+
+function guardarDatos() {
+    localStorage.setItem("pendientes", JSON.stringify(pendientes));
+}
+
+function mostrarFecha() {
+
+    const hoy = new Date();
+
+    const texto = hoy.toLocaleDateString(
+        "es-MX",
+        {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+        }
+    );
+
+    document.getElementById("fecha").textContent =
+        texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function abrirModal() {
+
+    document.getElementById("modalFondo").style.display = "flex";
+
+    setTimeout(() => {
+        document.getElementById("nuevoPendiente").focus();
+    }, 100);
+}
+
+function cerrarModal() {
+
+    document.getElementById("modalFondo").style.display = "none";
+
+    document.getElementById("nuevoPendiente").value = "";
+    document.getElementById("fechaAviso").value = "";
+}
+
+function guardarPendiente() {
+
+    const texto =
+        document.getElementById("nuevoPendiente").value.trim();
+
+    const aviso =
+        document.getElementById("fechaAviso").value;
+
+    if (!texto) {
+        return;
+    }
+
+    pendientes.unshift({
+        id: Date.now(),
+        texto: texto,
+        aviso: aviso,
+        terminado: false,
+        fecha: new Date().toISOString()
+    });
+
+    guardarDatos();
+
+    cerrarModal();
+
+    renderizar();
+}
+
+function cambiarEstado(id) {
+
+    const pendiente =
+        pendientes.find(p => p.id === id);
+
+    if (!pendiente) return;
+
+    pendiente.terminado = !pendiente.terminado;
+
+    guardarDatos();
+
+    renderizar();
+}
+
+function borrarPendiente(id) {
+
+    pendientes =
+        pendientes.filter(p => p.id !== id);
+
+    guardarDatos();
+
+    renderizar();
+}
+
+function crearPendiente(p) {
+
+    const div = document.createElement("div");
+
+    div.className =
+        "pendiente" + (p.terminado ? " terminado" : "");
+
+    let hora = "";
+
+    if (p.aviso) {
+
+        const fecha = new Date(p.aviso);
+
+        hora =
+            `<div class="hora">
+                🔔 ${fecha.toLocaleString("es-MX", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit"
+                })}
+            </div>`;
+    }
+
+    div.innerHTML = `
+        <div
+            class="check ${p.terminado ? "hecho" : ""}"
+            onclick="cambiarEstado(${p.id})">
+        </div>
+
+        <div class="contenido">
+            <div class="texto">${escapar(p.texto)}</div>
+            ${hora}
+        </div>
+
+        <button
+            class="borrar"
+            onclick="borrarPendiente(${p.id})">
+            ×
+        </button>
+    `;
+
+    return div;
+}
+
+function escapar(texto) {
+
+    const div = document.createElement("div");
+
+    div.textContent = texto;
+
+    return div.innerHTML;
+}
+
+function renderizar() {
+
+    const lista =
+        document.getElementById("lista");
+
+    const finalizados =
+        document.getElementById("finalizados");
+
+    lista.innerHTML = "";
+    finalizados.innerHTML = "";
+
+    const activos =
+        pendientes.filter(p => !p.terminado);
+
+    const hechos =
+        pendientes.filter(p => p.terminado);
+
+    document.getElementById("contador").textContent =
+        `${activos.length} pendientes · ${hechos.length} terminados`;
+
+    if (activos.length === 0) {
+
+        lista.innerHTML =
+            `<div class="vacio">
+                🎉 No tienes pendientes
+            </div>`;
+    }
+
+    activos.forEach(p => {
+        lista.appendChild(crearPendiente(p));
+    });
+
+    hechos.forEach(p => {
+        finalizados.appendChild(crearPendiente(p));
+    });
+}
+
+mostrarFecha();
+renderizar();
+
+</script>
+
+</body>
+</html>

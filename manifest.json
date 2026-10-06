@@ -1,0 +1,10 @@
+{
+  "name": "Pendiente",
+  "short_name": "Pendiente",
+  "description": "Mis pendientes del día a día",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007aff",
+  "lang": "es-MX"
+}
