@@ -1,4 +1,4 @@
-const CACHE_NAME = "pendiente-v1";
+const CACHE_NAME = "pendiente-v2";
 
 const ARCHIVOS = [
     "./",
