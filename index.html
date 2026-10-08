@@ -6,7 +6,6 @@
 
 <title>Pendiente</title>
 <link rel="manifest" href="manifest.json">
-   <link rel="apple-touch-icon" href="icon-512.png">
 <meta name="theme-color" content="#007aff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -235,6 +234,23 @@
     <button class="agregar" onclick="abrirModal()">
         ＋ Agregar pendiente
     </button>
+<button
+    id="btnNotificaciones"
+    onclick="activarNotificaciones()"
+    style="
+        width:100%;
+        border:none;
+        background:#f0f4f9;
+        color:#007aff;
+        font-size:15px;
+        font-weight:600;
+        padding:13px;
+        border-radius:13px;
+        cursor:pointer;
+        margin-top:10px;
+    ">
+    🔔 Activar recordatorios
+</button>
 
     <div class="finalizados-titulo">
         Finalizados de hoy
@@ -279,7 +295,24 @@
 <script>
 
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
+async function activarNotificaciones() {
 
+    if (!("Notification" in window)) {
+        alert("Este dispositivo no permite notificaciones.");
+        return;
+    }
+
+    const permiso = await Notification.requestPermission();
+
+    if (permiso === "granted") {
+        document.getElementById("btnNotificaciones").textContent =
+            "🔔 Recordatorios activados";
+
+        alert("¡Listo! Pendiente ya puede enviarte recordatorios.");
+    } else {
+        alert("Necesitamos permiso para poder recordarte tus pendientes.");
+    }
+}
 function guardarDatos() {
     localStorage.setItem("pendientes", JSON.stringify(pendientes));
 }
@@ -464,6 +497,15 @@ mostrarFecha();
 renderizar();
 
 </script>
-
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker
+            .register("./sw.js")
+            .then(() => console.log("Pendiente listo"))
+            .catch(error => console.log("Error:", error));
+    });
+}
+</script>
 </body>
 </html>
