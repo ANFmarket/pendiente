@@ -6,6 +6,7 @@
 
 <title>Pendiente</title>
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="theme-color" content="#007aff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -267,6 +268,22 @@
     ">
     🧪 Probar notificación
 </button>
+<button
+    onclick="probarSupabase()"
+    style="
+        width:100%;
+        border:none;
+        background:#f0f4f9;
+        color:#007aff;
+        font-size:15px;
+        font-weight:600;
+        padding:13px;
+        border-radius:13px;
+        cursor:pointer;
+        margin-top:10px;
+    ">
+    ☁️ Probar conexión
+</button>
 
     <div class="finalizados-titulo">
         Finalizados de hoy
@@ -309,7 +326,28 @@
 </div>
 
 <script>
+const SUPABASE_URL = "https://pteopgkjtaggattgmrue.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Hs72KK_8xIX_ZgNFLFEYbw_wjHmRVSV";
 
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+async function probarSupabase() {
+    const { error } = await supabaseClient
+        .from("push_subscriptions")
+        .insert({
+            endpoint: "prueba-" + Date.now(),
+            p256dh: "prueba",
+            auth: "prueba"
+        });
+
+    if (error) {
+        alert("❌ Supabase: " + error.message);
+    } else {
+        alert("✅ Pendiente conectado con Supabase");
+    }
+}
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 
 async function activarNotificaciones() {
