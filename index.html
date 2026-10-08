@@ -393,12 +393,10 @@ async function activarNotificaciones() {
 
         const { error } = await supabaseClient
             .from("push_subscriptions")
-            .upsert({
+            .insert({
                 endpoint: datos.endpoint,
                 p256dh: datos.keys.p256dh,
                 auth: datos.keys.auth
-            }, {
-                onConflict: "endpoint"
             });
 
         if (error) throw error;
