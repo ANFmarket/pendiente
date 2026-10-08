@@ -351,6 +351,24 @@ async function probarSupabase() {
     }
 }
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
+async function iniciarSesion() {
+    const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+        const { error } =
+            await supabaseClient.auth.signInAnonymously();
+
+        if (error) {
+            console.error("Error de autenticación:", error.message);
+            return;
+        }
+    }
+
+    console.log("PENDIENTE: sesión iniciada");
+}
+
+iniciarSesion();
 
 
 async function activarNotificaciones() {
@@ -493,30 +511,50 @@ function cerrarModal() {
     document.getElementById("fechaAviso").value = "";
 }
 
-function guardarPendiente() {
 
-    const texto =
-        document.getElementById("nuevoPendiente").value.trim();
+async function guardarPendiente() {
+    const texto = document.getElementById("nuevoPendiente").value.trim();
+    const aviso = document.getElementById("fechaAviso").value;
 
-    const aviso =
-        document.getElementById("fechaAviso").value;
+    if (!texto) return;
 
-    if (!texto) {
-        return;
-    }
-
-    pendientes.unshift({
+    const pendiente = {
         id: Date.now(),
         texto: texto,
         aviso: aviso,
         terminado: false,
         fecha: new Date().toISOString()
-    });
+    };
 
+    if (aviso) {
+        try {
+            const registro = await navigator.serviceWorker.ready;
+            const suscripcion = await registro.pushManager.getSubscription();
+
+            if (!suscripcion) {
+                alert("Activa los recordatorios antes de programar un aviso.");
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from("recordatorios")
+                .insert({
+                    texto: texto,
+                    endpoint: suscripcion.endpoint,
+                    fecha_aviso: new Date(aviso).toISOString()
+                });
+
+            if (error) throw error;
+
+        } catch (error) {
+            alert("No se pudo programar el aviso: " + error.message);
+            return;
+        }
+    }
+
+    pendientes.unshift(pendiente);
     guardarDatos();
-
     cerrarModal();
-
     renderizar();
 }
 
