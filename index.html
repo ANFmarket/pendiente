@@ -408,13 +408,20 @@ async function activarNotificaciones() {
         }
 
         const datos = suscripcion.toJSON();
+const { data: { user }, error: errorUsuario } =
+    await supabaseClient.auth.getUser();
+
+if (errorUsuario || !user) {
+    throw new Error("No se pudo identificar al usuario");
+}
 
         const { error } = await supabaseClient
             .from("push_subscriptions")
             .insert({
                 endpoint: datos.endpoint,
                 p256dh: datos.keys.p256dh,
-                auth: datos.keys.auth
+                auth: datos.keys.auth,
+user_id: user.id
             });
 
         if (error) throw error;
