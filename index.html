@@ -312,13 +312,33 @@
 
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 async function activarNotificaciones() {
-function probarNotificacion() {
+async function probarNotificacion() {
+
+    alert("Paso 1: botón funcionando");
 
     if (Notification.permission !== "granted") {
-        alert("Primero activa los recordatorios.");
+        alert("ERROR: las notificaciones no tienen permiso.");
         return;
     }
 
+    alert("Paso 2: permiso correcto");
+
+    try {
+        const registro = await navigator.serviceWorker.ready;
+
+        alert("Paso 3: Service Worker listo");
+
+        await registro.showNotification("Pendiente ☑️", {
+            body: "👀 Oye, ¿cómo vas? Todavía tienes cosas pendientes.",
+            icon: "./icon-512.png"
+        });
+
+        alert("Paso 4: notificación enviada");
+
+    } catch (error) {
+        alert("ERROR: " + error.message);
+    }
+}
     navigator.serviceWorker.ready.then(registro => {
         registro.showNotification("Pendiente ☑️", {
             body: "👀 Oye, ¿cómo vas? Todavía tienes cosas pendientes.",
