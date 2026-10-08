@@ -352,20 +352,65 @@ async function probarSupabase() {
 }
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 
+
 async function activarNotificaciones() {
-    if (!("Notification" in window)) {
-        alert("Este dispositivo no permite notificaciones.");
-        return;
-    }
+    try {
+        if (!("Notification" in window) ||
+            !("serviceWorker" in navigator) ||
+            !("PushManager" in window)) {
+            alert("Este navegador no admite notificaciones push.");
+            return;
+        }
 
-    const permiso = await Notification.requestPermission();
+        const permiso = await Notification.requestPermission();
 
-    if (permiso === "granted") {
+        if (permiso !== "granted") {
+            alert("Necesitamos permiso para las notificaciones.");
+            return;
+        }
+
+        const registro = await navigator.serviceWorker.ready;
+
+        function convertirClave(base64) {
+            const padding = "=".repeat((4 - base64.length % 4) % 4);
+            const texto = (base64 + padding)
+                .replace(/-/g, "+")
+                .replace(/_/g, "/");
+
+            return Uint8Array.from(atob(texto), c => c.charCodeAt(0));
+        }
+
+        let suscripcion = await registro.pushManager.getSubscription();
+
+        if (!suscripcion) {
+            suscripcion = await registro.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertirClave(VAPID_PUBLIC_KEY)
+            });
+        }
+
+        const datos = suscripcion.toJSON();
+
+        const { error } = await supabaseClient
+            .from("push_subscriptions")
+            .upsert({
+                endpoint: datos.endpoint,
+                p256dh: datos.keys.p256dh,
+                auth: datos.keys.auth
+            }, {
+                onConflict: "endpoint"
+            });
+
+        if (error) throw error;
+
         document.getElementById("btnNotificaciones").textContent =
             "🔔 Recordatorios activados";
-        alert("¡Listo! Pendiente ya puede enviarte recordatorios.");
-    } else {
-        alert("Necesitamos permiso para poder recordarte tus pendientes.");
+
+        alert("✅ Dispositivo registrado correctamente.");
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Error: " + error.message);
     }
 }
 
