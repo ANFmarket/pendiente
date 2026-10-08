@@ -251,6 +251,22 @@
     ">
     🔔 Activar recordatorios
 </button>
+<button
+    onclick="probarNotificacion()"
+    style="
+        width:100%;
+        border:none;
+        background:#f0f4f9;
+        color:#007aff;
+        font-size:15px;
+        font-weight:600;
+        padding:13px;
+        border-radius:13px;
+        cursor:pointer;
+        margin-top:10px;
+    ">
+    🧪 Probar notificación
+</button>
 
     <div class="finalizados-titulo">
         Finalizados de hoy
@@ -296,6 +312,21 @@
 
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 async function activarNotificaciones() {
+function probarNotificacion() {
+
+    if (Notification.permission !== "granted") {
+        alert("Primero activa los recordatorios.");
+        return;
+    }
+
+    navigator.serviceWorker.ready.then(registro => {
+        registro.showNotification("Pendiente ☑️", {
+            body: "👀 Oye, ¿cómo vas? Todavía tienes cosas pendientes.",
+            icon: "./icon-512.png",
+            badge: "./icon-512.png"
+        });
+    });
+}
 
     if (!("Notification" in window)) {
         alert("Este dispositivo no permite notificaciones.");
