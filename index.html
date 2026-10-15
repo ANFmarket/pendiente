@@ -252,8 +252,7 @@
     ">
     🔔 Activar recordatorios
 </button>
-
-    <div class="finalizados-titulo">
+<div class="finalizados-titulo">
         Finalizados de hoy
     </div>
 
@@ -303,151 +302,56 @@ const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-async function probarSupabase() {
-    const { error } = await supabaseClient
-        .from("push_subscriptions")
-        .insert({
-            endpoint: "prueba-" + Date.now(),
-            p256dh: "prueba",
-            auth: "prueba"
-        });
-
-    if (error) {
-        alert("❌ Supabase: " + error.message);
-    } else {
-        alert("✅ Pendiente conectado con Supabase");
-    }
-}
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
+
 async function iniciarSesion() {
-    const { data: { session } } =
-        await supabaseClient.auth.getSession();
-
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
-        const { error } =
-            await supabaseClient.auth.signInAnonymously();
-
-        if (error) {
-            console.error("Error de autenticación:", error.message);
-            return;
-        }
+        const { error } = await supabaseClient.auth.signInAnonymously();
+        if (error) { console.error("Error de autenticación:", error.message); return; }
     }
-
-    console.log("PENDIENTE: sesión iniciada");
 }
-
 iniciarSesion();
-
 
 async function activarNotificaciones() {
     try {
-        if (!("Notification" in window) ||
-            !("serviceWorker" in navigator) ||
-            !("PushManager" in window)) {
+        if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
             alert("Este navegador no admite notificaciones push.");
             return;
         }
-
         const permiso = await Notification.requestPermission();
-
         if (permiso !== "granted") {
             alert("Necesitamos permiso para las notificaciones.");
             return;
         }
-
         const registro = await navigator.serviceWorker.ready;
-
         function convertirClave(base64) {
             const padding = "=".repeat((4 - base64.length % 4) % 4);
-            const texto = (base64 + padding)
-                .replace(/-/g, "+")
-                .replace(/_/g, "/");
-
+            const texto = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
             return Uint8Array.from(atob(texto), c => c.charCodeAt(0));
         }
-
         let suscripcion = await registro.pushManager.getSubscription();
-
         if (!suscripcion) {
             suscripcion = await registro.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: convertirClave(VAPID_PUBLIC_KEY)
             });
         }
-
         const datos = suscripcion.toJSON();
-const { data: { user }, error: errorUsuario } =
-    await supabaseClient.auth.getUser();
-
-if (errorUsuario || !user) {
-    throw new Error("No se pudo identificar al usuario");
-}
-
-        const { error } = await supabaseClient
-    .from("push_subscriptions")
-    .upsert({
-        endpoint: datos.endpoint,
-        p256dh: datos.keys.p256dh,
-        auth: datos.keys.auth,
-        user_id: user.id
-    }, {
-        onConflict: "endpoint"
-    });
-
+        const { data: { user }, error: errorUsuario } = await supabaseClient.auth.getUser();
+        if (errorUsuario || !user) throw new Error("No se pudo identificar al usuario");
+        const { error } = await supabaseClient.from("push_subscriptions").upsert({
+            endpoint: datos.endpoint,
+            p256dh: datos.keys.p256dh,
+            auth: datos.keys.auth,
+            user_id: user.id
+        }, { onConflict: "endpoint" });
         if (error) throw error;
-
-        document.getElementById("btnNotificaciones").textContent =
-            "🔔 Recordatorios activados";
-
+        document.getElementById("btnNotificaciones").textContent = "🔔 Recordatorios activados";
         alert("✅ Dispositivo registrado correctamente.");
-
     } catch (error) {
         console.error(error);
         alert("❌ Error: " + error.message);
-    }
-}
-
-async function probarNotificacion() {
-
-    if (Notification.permission !== "granted") {
-        alert("Primero activa los recordatorios 🔔");
-        return;
-    }
-
-    const activos = pendientes.filter(p => !p.terminado);
-
-    let mensaje;
-
-    if (activos.length > 0) {
-
-        const elegido =
-            activos[Math.floor(Math.random() * activos.length)];
-
-        const frases = [
-            `👀 Oye, ¿cómo vas con "${elegido.texto}"?`,
-            `😎 ¿Ya puedo tachar "${elegido.texto}"?`,
-            `☑️ No se nos olvide: "${elegido.texto}"`,
-            `👀 Todavía tenemos pendiente "${elegido.texto}". ¿Cómo vamos?`
-        ];
-
-        mensaje =
-            frases[Math.floor(Math.random() * frases.length)];
-
-    } else {
-        mensaje = "🎉 No tienes pendientes. Ya acabamos por hoy 😎";
-    }
-
-    try {
-        const registro = await navigator.serviceWorker.ready;
-
-        await registro.showNotification("Pendiente ☑️", {
-            body: mensaje,
-            icon: "./icon-512.png",
-            badge: "./icon-512.png"
-        });
-
-    } catch (error) {
-        alert("No pude enviar la notificación: " + error.message);
     }
 }
 function guardarDatos() {
@@ -488,59 +392,41 @@ function cerrarModal() {
     document.getElementById("fechaAviso").value = "";
 }
 
-
 async function guardarPendiente() {
     const texto = document.getElementById("nuevoPendiente").value.trim();
     const aviso = document.getElementById("fechaAviso").value;
-
     if (!texto) return;
-
-    const pendiente = {
-        id: Date.now(),
-        texto: texto,
-        aviso: aviso,
-        terminado: false,
-        fecha: new Date().toISOString()
-    };
-
-    if (aviso) {
-        try {
+    const boton = document.querySelector("button.guardar");
+    boton.disabled = true;
+    try {
+        if (aviso) {
             const registro = await navigator.serviceWorker.ready;
             const suscripcion = await registro.pushManager.getSubscription();
-
-            if (!suscripcion) {
-                alert("Activa los recordatorios antes de programar un aviso.");
-                return;
-            }
-
-            const { data: { user }, error: errorUsuario } =
-    await supabaseClient.auth.getUser();
-
-if (errorUsuario || !user) {
-    throw new Error("No se pudo identificar al usuario");
-}
-
-const { error } = await supabaseClient
-    .from("recordatorios")
-    .insert({
-        texto: texto,
-        endpoint: suscripcion.endpoint,
-        fecha_aviso: new Date(aviso).toISOString(),
-        user_id: user.id,
-        enviado: false
-    });
+            if (!suscripcion) throw new Error("Primero pulsa Activar recordatorios para registrar este dispositivo.");
+            const { data: { user }, error: errorUsuario } = await supabaseClient.auth.getUser();
+            if (errorUsuario || !user) throw new Error("No se pudo identificar al usuario.");
+            const { error } = await supabaseClient.from("recordatorios").insert({
+                texto: texto,
+                endpoint: suscripcion.endpoint,
+                fecha_aviso: new Date(aviso).toISOString(),
+                user_id: user.id,
+                enviado: false
+            });
             if (error) throw error;
-
-        } catch (error) {
-            alert("No se pudo programar el aviso: " + error.message);
-            return;
         }
+        pendientes.unshift({
+            id: Date.now(), texto: texto, aviso: aviso,
+            terminado: false, fecha: new Date().toISOString()
+        });
+        guardarDatos();
+        cerrarModal();
+        renderizar();
+    } catch (error) {
+        console.error(error);
+        alert("No se pudo guardar el recordatorio: " + error.message);
+    } finally {
+        boton.disabled = false;
     }
-
-    pendientes.unshift(pendiente);
-    guardarDatos();
-    cerrarModal();
-    renderizar();
 }
 
 function cambiarEstado(id) {
