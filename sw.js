@@ -61,3 +61,29 @@ self.addEventListener("notificationclick", event => {
         })
     );
 });
+
+self.addEventListener("push", event => {
+    let datos = {};
+
+    try {
+        datos = event.data ? event.data.json() : {};
+    } catch (error) {
+        datos = {
+            body: event.data ? event.data.text() : ""
+        };
+    }
+
+    const titulo = datos.title || "Pendiente ☑️";
+    const mensaje = datos.body || "👀 Oye, todavía tienes cosas pendientes.";
+
+    event.waitUntil(
+        self.registration.showNotification(titulo, {
+            body: mensaje,
+            icon: "./icon-512.png",
+            badge: "./icon-512.png",
+            data: {
+                url: datos.url || "./"
+            }
+        })
+    );
+});
