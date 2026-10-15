@@ -429,27 +429,54 @@ async function guardarPendiente() {
     }
 }
 
-function cambiarEstado(id) {
+async function cancelarRecordatorio(pendiente) {
+    if (!pendiente.aviso) return;
+    const registro = await navigator.serviceWorker.ready;
+    const suscripcion = await registro.pushManager.getSubscription();
+    if (!suscripcion) throw new Error("No hay suscripción de notificaciones en este dispositivo.");
+    const { data: { user }, error: errorUsuario } = await supabaseClient.auth.getUser();
+    if (errorUsuario || !user) throw new Error("No se pudo identificar al usuario.");
+    const { error } = await supabaseClient.from("recordatorios")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("endpoint", suscripcion.endpoint)
+        .eq("texto", pendiente.texto)
+        .eq("fecha_aviso", new Date(pendiente.aviso).toISOString())
+        .eq("enviado", false);
+    if (error) throw error;
+}
 
-    const pendiente =
-        pendientes.find(p => p.id === id);
-
+async function cambiarEstado(id) {
+    const pendiente = pendientes.find(p => p.id === id);
     if (!pendiente) return;
-
+    if (!pendiente.terminado && pendiente.aviso) {
+        try { await cancelarRecordatorio(pendiente); }
+        catch (error) {
+            console.error(error);
+            alert("No se pudo cancelar el recordatorio. Intenta nuevamente: " + error.message);
+            return;
+        }
+    }
     pendiente.terminado = !pendiente.terminado;
-
+    // Al reabrir un pendiente, el aviso anterior no se reactiva automáticamente.
+    if (!pendiente.terminado && pendiente.aviso) pendiente.aviso = "";
     guardarDatos();
-
     renderizar();
 }
 
-function borrarPendiente(id) {
-
-    pendientes =
-        pendientes.filter(p => p.id !== id);
-
+async function borrarPendiente(id) {
+    const pendiente = pendientes.find(p => p.id === id);
+    if (!pendiente) return;
+    if (!pendiente.terminado && pendiente.aviso) {
+        try { await cancelarRecordatorio(pendiente); }
+        catch (error) {
+            console.error(error);
+            alert("No se pudo cancelar el recordatorio. Intenta nuevamente: " + error.message);
+            return;
+        }
+    }
+    pendientes = pendientes.filter(p => p.id !== id);
     guardarDatos();
-
     renderizar();
 }
 
