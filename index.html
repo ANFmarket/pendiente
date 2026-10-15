@@ -545,14 +545,22 @@ async function guardarPendiente() {
                 return;
             }
 
-            const { error } = await supabaseClient
-                .from("recordatorios")
-                .insert({
-                    texto: texto,
-                    endpoint: suscripcion.endpoint,
-                    fecha_aviso: new Date(aviso).toISOString()
-                });
+            const { data: { user }, error: errorUsuario } =
+    await supabaseClient.auth.getUser();
 
+if (errorUsuario || !user) {
+    throw new Error("No se pudo identificar al usuario");
+}
+
+const { error } = await supabaseClient
+    .from("recordatorios")
+    .insert({
+        texto: texto,
+        endpoint: suscripcion.endpoint,
+        fecha_aviso: new Date(aviso).toISOString(),
+        user_id: user.id,
+        enviado: false
+    });
             if (error) throw error;
 
         } catch (error) {
