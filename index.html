@@ -380,11 +380,58 @@ const supabaseClient = supabase.createClient(
 );
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 
+let usuarioActual = null;
+let sincronizacionLista = false;
+
+function filaPendiente(p) {
+    return {
+        id: String(p.id), user_id: usuarioActual.id, texto: p.texto,
+        aviso: p.aviso ? new Date(p.aviso).toISOString() : null,
+        terminado: Boolean(p.terminado),
+        creado: p.fecha || new Date().toISOString()
+    };
+}
+
+async function subirPendiente(p) {
+    if (!usuarioActual) throw new Error("No hay sesión activa.");
+    const { error } = await supabaseClient.from("pendientes")
+        .upsert(filaPendiente(p), { onConflict: "id" });
+    if (error) throw error;
+}
+
 async function iniciarSesion() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-        const { error } = await supabaseClient.auth.signInAnonymously();
-        if (error) { console.error("Error de autenticación:", error.message); return; }
+    try {
+        let { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (!session) {
+            const respuesta = await supabaseClient.auth.signInAnonymously();
+            if (respuesta.error) throw respuesta.error;
+            session = respuesta.data.session;
+        }
+        if (!session?.user) throw new Error("No se pudo iniciar sesión.");
+        usuarioActual = session.user;
+        // Primero migrar los pendientes existentes del dispositivo, sin borrarlos.
+        for (const p of pendientes) await subirPendiente(p);
+        const respuesta = await supabaseClient.from("pendientes")
+            .select("id,texto,aviso,terminado,creado")
+            .eq("user_id", usuarioActual.id);
+        if (respuesta.error) throw respuesta.error;
+        const existentes = new Set(pendientes.map(p => String(p.id)));
+        for (const r of respuesta.data || []) {
+            if (existentes.has(r.id)) continue;
+            // Las fechas se convierten al formato local requerido por datetime-local.
+            const d = r.aviso ? new Date(r.aviso) : null;
+            const local = d ? new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16) : "";
+            pendientes.push({id: Number(r.id), texto:r.texto, aviso:local,
+                terminado:r.terminado, fecha:r.creado});
+        }
+        pendientes.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
+        guardarDatos();
+        sincronizacionLista = true;
+        renderizar();
+    } catch (e) {
+        console.error("Sincronización de pendientes:", e);
+        alert("No se pudo conectar con Supabase. Tus pendientes locales están a salvo. Comprueba la conexión y vuelve a abrir PENDIENTE. Detalle: " + e.message);
     }
 }
 iniciarSesion();
@@ -472,9 +519,16 @@ async function guardarPendiente() {
     const texto = document.getElementById("nuevoPendiente").value.trim();
     const aviso = document.getElementById("fechaAviso").value;
     if (!texto) return;
+    if (!sincronizacionLista) { alert("Espera a que termine la sincronización con Supabase."); return; }
     const boton = document.querySelector("button.guardar");
     boton.disabled = true;
+    let nuevo = null;
     try {
+        nuevo = {
+            id: Date.now() * 1000 + Math.floor(Math.random()*1000),
+            texto, aviso, terminado:false, fecha:new Date().toISOString()
+        };
+        await subirPendiente(nuevo);
         if (aviso) {
             const registro = await navigator.serviceWorker.ready;
             const suscripcion = await registro.pushManager.getSubscription();
@@ -490,16 +544,18 @@ async function guardarPendiente() {
             });
             if (error) throw error;
         }
-        pendientes.unshift({
-            id: Date.now(), texto: texto, aviso: aviso,
-            terminado: false, fecha: new Date().toISOString()
-        });
+        pendientes.unshift(nuevo);
         guardarDatos();
         cerrarModal();
         renderizar();
     } catch (error) {
         console.error(error);
-        alert("No se pudo guardar el recordatorio: " + error.message);
+        if (nuevo) {
+            const { error: rollbackError } = await supabaseClient.from("pendientes")
+                .delete().eq("id", String(nuevo.id)).eq("user_id", usuarioActual.id);
+            if (rollbackError) console.error("Error revirtiendo alta:", rollbackError);
+        }
+        alert("No se pudo guardar el pendiente: " + error.message);
     } finally {
         boton.disabled = false;
     }
@@ -523,6 +579,7 @@ async function cancelarRecordatorio(pendiente) {
 }
 
 async function cambiarEstado(id) {
+    if (!sincronizacionLista) return alert("Espera a que termine la sincronización.");
     const pendiente = pendientes.find(p => p.id === id);
     if (!pendiente) return;
     if (!pendiente.terminado && pendiente.aviso) {
@@ -533,14 +590,18 @@ async function cambiarEstado(id) {
             return;
         }
     }
-    pendiente.terminado = !pendiente.terminado;
+    const actualizado = {...pendiente, terminado: !pendiente.terminado};
     // Al reabrir un pendiente, el aviso anterior no se reactiva automáticamente.
-    if (!pendiente.terminado && pendiente.aviso) pendiente.aviso = "";
+    if (!actualizado.terminado && actualizado.aviso) actualizado.aviso = "";
+    try { await subirPendiente(actualizado); }
+    catch (error) { alert("No se pudo actualizar el pendiente: " + error.message); return; }
+    Object.assign(pendiente, actualizado);
     guardarDatos();
     renderizar();
 }
 
 async function borrarPendiente(id) {
+    if (!sincronizacionLista) return alert("Espera a que termine la sincronización.");
     const pendiente = pendientes.find(p => p.id === id);
     if (!pendiente) return;
     if (!pendiente.terminado && pendiente.aviso) {
@@ -551,6 +612,9 @@ async function borrarPendiente(id) {
             return;
         }
     }
+    const { error } = await supabaseClient.from("pendientes")
+        .delete().eq("id", String(id)).eq("user_id", usuarioActual.id);
+    if (error) { alert("No se pudo eliminar el pendiente: " + error.message); return; }
     pendientes = pendientes.filter(p => p.id !== id);
     guardarDatos();
     renderizar();
