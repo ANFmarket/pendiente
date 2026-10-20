@@ -7,7 +7,7 @@
 <title>Pendiente</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<meta name="theme-color" content="#f5f8fb">
+<meta name="theme-color" content="#007aff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Pendiente">
@@ -110,6 +110,18 @@
         color: #777;
         margin-top: 5px;
     }
+
+    .editar {
+        border: none;
+        background: #f0f4f9;
+        color: #007aff;
+        border-radius: 8px;
+        padding: 9px 8px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .contenido { min-width: 0; overflow-wrap: anywhere; }
 
     .borrar {
         border: none;
@@ -215,88 +227,12 @@
         color: #999;
         padding: 35px 10px;
     }
-
-/* PENDIENTE — Edición Clara Premium. Solo apariencia; lógica intacta. */
-:root { color-scheme: light; --azul:#2869ad; --tinta:#243448; --suave:#718196; }
-html { background:#edf1f5; }
-body { background:linear-gradient(155deg,#f8fafc 0%,#e7edf4 100%); color:var(--tinta); }
-.app { background:linear-gradient(165deg,#fcfdff 0%,#f5f8fb 100%); box-shadow:0 0 0 1px rgba(100,125,150,.08),0 12px 65px rgba(43,64,91,.12); padding:calc(42px + env(safe-area-inset-top)) 22px calc(32px + env(safe-area-inset-bottom)); }
-.fecha { color:#7a899a; font-size:14px; font-weight:500; letter-spacing:.15px; }
-h1 { color:#1f3044; font-size:42px; letter-spacing:-1.6px; font-weight:750; margin-bottom:13px; }
-.contador { color:#57718e; background:#eaf1f9; border:1px solid #dfeaf5; box-shadow:inset 0 1px 1px #fff,0 3px 8px rgba(45,72,105,.05); padding:9px 15px; font-weight:600; margin-bottom:23px; }
-#lista { margin-bottom:22px; }
-.pendiente { background:#fff; border:1px solid #e8edf3; border-radius:18px; margin:0 0 11px; padding:17px 15px; align-items:center; box-shadow:0 5px 14px rgba(40,65,95,.07),0 1px 3px rgba(40,65,95,.04),inset 0 1px 0 #fff; transition:transform .2s ease,box-shadow .2s ease; }
-.pendiente:active { transform:scale(.992); box-shadow:0 2px 7px rgba(40,65,95,.07); }
-.check { width:28px; height:28px; border-color:#b7c8da; background:linear-gradient(#fff,#f6f9fd); box-shadow:inset 0 1px 2px rgba(42,63,90,.05),0 2px 5px rgba(42,63,90,.05); }
-.check.hecho { background:linear-gradient(150deg,#4d91d0,#2467ac); border-color:#397dbf; box-shadow:0 3px 8px rgba(39,105,173,.22); }
-.texto { color:#26384e; font-size:16.5px; font-weight:540; line-height:1.4; }
-.terminado { background:#f8fafc; box-shadow:0 2px 8px rgba(40,65,95,.035); }
-.terminado .texto { color:#9aa5b2; }
-.hora { color:#8592a3; font-size:12.5px; }
-.borrar { color:#a3b1c1; padding:6px; font-size:22px; }
-.agregar,.guardar { background:linear-gradient(180deg,#4289ca 0%,#286db1 65%,#2264a7 100%); border:1px solid #2467a8; border-radius:15px; box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 13px rgba(32,95,163,.19),0 2px 3px rgba(32,95,163,.12); text-shadow:0 1px 1px rgba(12,60,110,.2); min-height:52px; }
-.agregar:active,.guardar:active { transform:translateY(1px); box-shadow:inset 0 2px 5px rgba(0,0,0,.1),0 2px 5px rgba(32,95,163,.1); }
-#btnNotificaciones { background:linear-gradient(180deg,#fff,#eef4fa) !important; color:#2e6fae !important; border:1px solid #d9e5f1 !important; border-radius:15px !important; box-shadow:inset 0 1px 0 #fff,0 4px 11px rgba(48,83,120,.07) !important; min-height:49px; }
-.finalizados-titulo { border-top:1px solid #e0e8f0; color:#748398; margin-top:31px; padding:19px 2px 13px; font-size:13px; letter-spacing:.25px; }
-.modal-fondo { background:rgba(27,44,66,.42); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
-.modal { background:linear-gradient(#fff,#f8fafd); border:1px solid #e7edf4; box-shadow:0 -10px 35px rgba(19,40,66,.16); border-radius:25px 25px 0 0; padding-bottom:calc(32px + env(safe-area-inset-bottom)); }
-.modal h2 { color:#24364a; letter-spacing:-.45px; }
-input { background:#fff; border:1px solid #dce5ef; box-shadow:inset 0 2px 4px rgba(32,57,86,.035); color:#24364a; }
-input:focus { border-color:#4385c4; box-shadow:0 0 0 3px rgba(53,125,194,.12); }
-.aviso { color:#53687f; }
-.cancelar { color:#427cb5; font-weight:600; }
-.vacio { color:#8a9aad; padding:37px 12px; border:1px dashed #d8e2ed; border-radius:18px; background:rgba(255,255,255,.6); }
-@media (prefers-reduced-motion:reduce) { .pendiente,.agregar,.guardar { transition:none; } }
-
-/* PENDIENTE — Identidad refinada 2026 */
-:root { --ink:#15283e; --navy:#173a63; --blue:#245b91; --muted:#758497; --line:#e6ebf0; --canvas:#f3f5f7; }
-html { background:var(--canvas); }
-body { color:var(--ink); background:var(--canvas); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-.app { background:transparent; max-width:520px; padding: max(38px, env(safe-area-inset-top)) 23px 45px; }
-.brand { display:flex; align-items:center; gap:11px; padding:5px 0 34px; }
-.brand-icon { height:43px; width:43px; border-radius:13px; display:grid; place-items:center; background:linear-gradient(145deg,#244e7c,#102b4a); box-shadow:0 5px 13px rgba(21,48,80,.16); color:white; position:relative; }
-.brand-icon .p { font-weight:800; font-size:31px; letter-spacing:-3px; line-height:1; margin-right:5px; }
-.brand-icon .tick { position:absolute; top:14px; right:7px; font-size:13px; font-weight:900; color:white; }
-.brand-name { font-size:14px; font-weight:750; letter-spacing:2.1px; }
-.brand-sub { font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:.15px; }
-.fecha { color:#77889a; font-size:13px; font-weight:550; letter-spacing:.15px; margin-bottom:6px; }
-h1 { color:#14283d; font-size:43px; font-weight:740; letter-spacing:-1.7px; margin-bottom:12px; }
-.contador { background:#e9eff5; border:1px solid #dce6ee; color:#526a81; font-size:12px; font-weight:650; padding:9px 14px; border-radius:9px; margin-bottom:26px; }
-#lista { margin-bottom:20px; }
-.pendiente { background:#fff; border:1px solid #e8edf2; border-radius:17px; padding:17px 15px; margin:0 0 11px; align-items:center; gap:13px; box-shadow:0 5px 18px rgba(21,41,62,.035),0 1px 2px rgba(21,41,62,.035); transition:transform .18s,box-shadow .18s; }
-.pendiente:active { transform:scale(.993); }
-.check { width:25px; height:25px; border:1.8px solid #b5c2cf; background:#fff; margin-top:0; }
-.check.hecho { background:var(--navy); border-color:var(--navy); }
-.check.hecho::after { left:5px; top:0px; font-size:17px; }
-.texto { color:#23354a; font-size:16px; line-height:1.45; font-weight:550; }
-.hora { color:#8191a1; font-size:12px; margin-top:7px; }
-.terminado { opacity:.7; background:#fafbfc; }
-.terminado .texto { color:#9aa6b2; }
-.borrar { color:#9daab8; font-size:22px; padding:6px 4px; }
-.agregar,.guardar { background:var(--navy); color:white; border:1px solid #173a63; border-radius:13px; padding:16px; font-size:15px; font-weight:700; box-shadow:0 5px 12px rgba(23,58,99,.14); }
-.agregar:active,.guardar:active { transform:translateY(1px); }
-#btnNotificaciones { background:#fff !important; color:var(--navy) !important; border:1px solid #e1e8ef !important; border-radius:13px !important; box-shadow:0 2px 8px rgba(23,58,99,.025); font-size:14px !important; font-weight:650 !important; padding:15px !important; margin-top:11px !important; }
-.finalizados-titulo { border-top:1px solid #e2e7ec; color:#64758a; margin-top:33px; font-size:12px; letter-spacing:.7px; text-transform:uppercase; }
-.vacio { background:#fff; border:1px dashed #d8e1e9; border-radius:17px; color:#8796a5; font-size:14px; }
-.modal-fondo { background:rgba(10,24,40,.4); backdrop-filter:blur(5px); z-index:10; }
-.modal { background:#f8fafc; border-radius:24px 24px 0 0; box-shadow:0 -15px 45px rgba(11,27,45,.12); padding-bottom:max(34px,env(safe-area-inset-bottom)); }
-.modal h2 { color:var(--ink); font-size:23px; letter-spacing:-.5px; }
-input { border:1px solid #e0e6ed; background:white; color:var(--ink); border-radius:12px; }
-input:focus { border-color:#51789f; box-shadow:0 0 0 3px rgba(38,90,140,.09); }
-.aviso { color:#65798c; font-size:13px; }
-.cancelar { color:var(--navy); }
-@media (min-width:620px) { .app { margin:30px auto; min-height:calc(100vh - 60px); border:1px solid #e6ebf0; border-radius:24px; padding:45px 35px; box-shadow:0 15px 55px rgba(20,44,70,.06); background:#f7f9fb; } }
-@media (prefers-reduced-motion:reduce) { .pendiente { transition:none; } }
 </style>
 </head>
 
 <body>
 
 <div class="app">
-    <div class="brand" aria-label="PENDIENTE">
-      <div class="brand-icon" aria-hidden="true"><span class="p">P</span><span class="tick">✓</span></div>
-      <div><div class="brand-name">PENDIENTE</div><div class="brand-sub">Tu día, en orden.</div></div>
-    </div>
 
     <div class="fecha" id="fecha"></div>
 
@@ -340,7 +276,7 @@ input:focus { border-color:#51789f; box-shadow:0 0 0 3px rgba(38,90,140,.09); }
 
     <div class="modal">
 
-        <h2>¿Qué tienes pendiente?</h2>
+        <h2 id="tituloModal">¿Qué tienes pendiente?</h2>
 
         <input
             id="nuevoPendiente"
@@ -380,58 +316,13 @@ const supabaseClient = supabase.createClient(
 );
 let pendientes = JSON.parse(localStorage.getItem("pendientes")) || [];
 
-let usuarioActual = null;
-let sincronizacionLista = false;
-
-function filaPendiente(p) {
-    return {
-        id: String(p.id), user_id: usuarioActual.id, texto: p.texto,
-        aviso: p.aviso ? new Date(p.aviso).toISOString() : null,
-        terminado: Boolean(p.terminado),
-        creado: p.fecha || new Date().toISOString()
-    };
-}
-
-async function subirPendiente(p) {
-    if (!usuarioActual) throw new Error("No hay sesión activa.");
-    const { error } = await supabaseClient.from("pendientes")
-        .upsert(filaPendiente(p), { onConflict: "id" });
-    if (error) throw error;
-}
+let editandoId = null;
 
 async function iniciarSesion() {
-    try {
-        let { data: { session }, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        if (!session) {
-            const respuesta = await supabaseClient.auth.signInAnonymously();
-            if (respuesta.error) throw respuesta.error;
-            session = respuesta.data.session;
-        }
-        if (!session?.user) throw new Error("No se pudo iniciar sesión.");
-        usuarioActual = session.user;
-        // Primero migrar los pendientes existentes del dispositivo, sin borrarlos.
-        for (const p of pendientes) await subirPendiente(p);
-        const respuesta = await supabaseClient.from("pendientes")
-            .select("id,texto,aviso,terminado,creado")
-            .eq("user_id", usuarioActual.id);
-        if (respuesta.error) throw respuesta.error;
-        const existentes = new Set(pendientes.map(p => String(p.id)));
-        for (const r of respuesta.data || []) {
-            if (existentes.has(r.id)) continue;
-            // Las fechas se convierten al formato local requerido por datetime-local.
-            const d = r.aviso ? new Date(r.aviso) : null;
-            const local = d ? new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16) : "";
-            pendientes.push({id: Number(r.id), texto:r.texto, aviso:local,
-                terminado:r.terminado, fecha:r.creado});
-        }
-        pendientes.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
-        guardarDatos();
-        sincronizacionLista = true;
-        renderizar();
-    } catch (e) {
-        console.error("Sincronización de pendientes:", e);
-        alert("No se pudo conectar con Supabase. Tus pendientes locales están a salvo. Comprueba la conexión y vuelve a abrir PENDIENTE. Detalle: " + e.message);
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+        const { error } = await supabaseClient.auth.signInAnonymously();
+        if (error) { console.error("Error de autenticación:", error.message); return; }
     }
 }
 iniciarSesion();
@@ -498,7 +389,27 @@ function mostrarFecha() {
         texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+function editarPendiente(id) {
+    const pendiente = pendientes.find(p => p.id === id);
+    if (!pendiente) return;
+    editandoId = id;
+    document.getElementById("tituloModal").textContent = "Editar pendiente";
+    document.getElementById("nuevoPendiente").value = pendiente.texto;
+    document.getElementById("fechaAviso").value = pendiente.aviso || "";
+    document.querySelector("button.guardar").textContent = "Guardar cambios";
+    mostrarModal();
+}
+
 function abrirModal() {
+    editandoId = null;
+    document.getElementById("tituloModal").textContent = "¿Qué tienes pendiente?";
+    document.getElementById("nuevoPendiente").value = "";
+    document.getElementById("fechaAviso").value = "";
+    document.querySelector("button.guardar").textContent = "Guardar";
+    mostrarModal();
+}
+
+function mostrarModal() {
 
     document.getElementById("modalFondo").style.display = "flex";
 
@@ -508,6 +419,7 @@ function abrirModal() {
 }
 
 function cerrarModal() {
+    editandoId = null;
 
     document.getElementById("modalFondo").style.display = "none";
 
@@ -518,105 +430,104 @@ function cerrarModal() {
 async function guardarPendiente() {
     const texto = document.getElementById("nuevoPendiente").value.trim();
     const aviso = document.getElementById("fechaAviso").value;
-    if (!texto) return;
-    if (!sincronizacionLista) { alert("Espera a que termine la sincronización con Supabase."); return; }
+    if (!texto) { document.getElementById("nuevoPendiente").focus(); return; }
+    const original = editandoId === null ? null : pendientes.find(p => p.id === editandoId);
+    if (editandoId !== null && !original) return;
     const boton = document.querySelector("button.guardar");
+    if (boton.disabled) return;
     boton.disabled = true;
-    let nuevo = null;
+    document.querySelector("button.cancelar").disabled = true;
+    let recordatorioId = original?.recordatorioId || null;
     try {
-        nuevo = {
-            id: Date.now() * 1000 + Math.floor(Math.random()*1000),
-            texto, aviso, terminado:false, fecha:new Date().toISOString()
-        };
-        await subirPendiente(nuevo);
-        if (aviso) {
-            const registro = await navigator.serviceWorker.ready;
-            const suscripcion = await registro.pushManager.getSubscription();
-            if (!suscripcion) throw new Error("Primero pulsa Activar recordatorios para registrar este dispositivo.");
+        const cambio = !original || original.texto !== texto || original.aviso !== aviso;
+        if (cambio && (aviso || original?.aviso)) {
+            await iniciarSesion();
             const { data: { user }, error: errorUsuario } = await supabaseClient.auth.getUser();
             if (errorUsuario || !user) throw new Error("No se pudo identificar al usuario.");
-            const { error } = await supabaseClient.from("recordatorios").insert({
-                texto: texto,
-                endpoint: suscripcion.endpoint,
-                fecha_aviso: new Date(aviso).toISOString(),
-                user_id: user.id,
-                enviado: false
-            });
-            if (error) throw error;
+            let endpoint;
+            if (!recordatorioId || aviso) {
+                if (!("serviceWorker" in navigator)) throw new Error("Abre la aplicación en tu dispositivo con recordatorios activados.");
+                const registro = await navigator.serviceWorker.ready;
+                const suscripcion = await registro.pushManager.getSubscription();
+                if (!suscripcion) throw new Error("Primero pulsa Activar recordatorios en este dispositivo.");
+                endpoint = suscripcion.endpoint;
+            }
+            // Los pendientes anteriores no guardaban el identificador del aviso.
+            // Se busca únicamente el aviso original de este usuario y dispositivo.
+            if (original?.aviso && !recordatorioId) {
+                const { data, error } = await supabaseClient.from("recordatorios")
+                    .select("id").eq("user_id", user.id).eq("endpoint", endpoint)
+                    .eq("texto", original.texto)
+                    .eq("fecha_aviso", new Date(original.aviso).toISOString())
+                    .eq("enviado", false);
+                if (error) throw error;
+                if (data.length > 1) throw new Error("Hay varios avisos iguales; no se modificó ninguno.");
+                recordatorioId = data[0]?.id || null;
+            }
+            if (recordatorioId) {
+                let consulta;
+                if (aviso) {
+                    consulta = supabaseClient.from("recordatorios").update({
+                        texto, fecha_aviso: new Date(aviso).toISOString(), enviado: false
+                    });
+                } else {
+                    consulta = supabaseClient.from("recordatorios").delete();
+                }
+                const { data, error } = await consulta.eq("id", recordatorioId)
+                    .eq("user_id", user.id).select("id");
+                if (error) throw error;
+                if (!data.length) throw new Error("No se pudo actualizar el aviso. Intenta de nuevo.");
+                if (!aviso) recordatorioId = null;
+            } else if (aviso) {
+                const { data, error } = await supabaseClient.from("recordatorios").insert({
+                    texto, endpoint, fecha_aviso: new Date(aviso).toISOString(),
+                    user_id: user.id, enviado: false
+                }).select("id").single();
+                if (error) throw error;
+                recordatorioId = data.id;
+            }
         }
-        pendientes.unshift(nuevo);
+        if (original) {
+            Object.assign(original, { texto, aviso, recordatorioId });
+        } else {
+            pendientes.unshift({
+                id: Date.now(), texto, aviso, recordatorioId,
+                terminado: false, fecha: new Date().toISOString()
+            });
+        }
         guardarDatos();
         cerrarModal();
         renderizar();
     } catch (error) {
         console.error(error);
-        if (nuevo) {
-            const { error: rollbackError } = await supabaseClient.from("pendientes")
-                .delete().eq("id", String(nuevo.id)).eq("user_id", usuarioActual.id);
-            if (rollbackError) console.error("Error revirtiendo alta:", rollbackError);
-        }
-        alert("No se pudo guardar el pendiente: " + error.message);
+        alert("No se pudo guardar: " + error.message);
     } finally {
         boton.disabled = false;
+        document.querySelector("button.cancelar").disabled = false;
     }
 }
 
-async function cancelarRecordatorio(pendiente) {
-    if (!pendiente.aviso) return;
-    const registro = await navigator.serviceWorker.ready;
-    const suscripcion = await registro.pushManager.getSubscription();
-    if (!suscripcion) throw new Error("No hay suscripción de notificaciones en este dispositivo.");
-    const { data: { user }, error: errorUsuario } = await supabaseClient.auth.getUser();
-    if (errorUsuario || !user) throw new Error("No se pudo identificar al usuario.");
-    const { error } = await supabaseClient.from("recordatorios")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("endpoint", suscripcion.endpoint)
-        .eq("texto", pendiente.texto)
-        .eq("fecha_aviso", new Date(pendiente.aviso).toISOString())
-        .eq("enviado", false);
-    if (error) throw error;
-}
+function cambiarEstado(id) {
 
-async function cambiarEstado(id) {
-    if (!sincronizacionLista) return alert("Espera a que termine la sincronización.");
-    const pendiente = pendientes.find(p => p.id === id);
+    const pendiente =
+        pendientes.find(p => p.id === id);
+
     if (!pendiente) return;
-    if (!pendiente.terminado && pendiente.aviso) {
-        try { await cancelarRecordatorio(pendiente); }
-        catch (error) {
-            console.error(error);
-            alert("No se pudo cancelar el recordatorio. Intenta nuevamente: " + error.message);
-            return;
-        }
-    }
-    const actualizado = {...pendiente, terminado: !pendiente.terminado};
-    // Al reabrir un pendiente, el aviso anterior no se reactiva automáticamente.
-    if (!actualizado.terminado && actualizado.aviso) actualizado.aviso = "";
-    try { await subirPendiente(actualizado); }
-    catch (error) { alert("No se pudo actualizar el pendiente: " + error.message); return; }
-    Object.assign(pendiente, actualizado);
+
+    pendiente.terminado = !pendiente.terminado;
+
     guardarDatos();
+
     renderizar();
 }
 
-async function borrarPendiente(id) {
-    if (!sincronizacionLista) return alert("Espera a que termine la sincronización.");
-    const pendiente = pendientes.find(p => p.id === id);
-    if (!pendiente) return;
-    if (!pendiente.terminado && pendiente.aviso) {
-        try { await cancelarRecordatorio(pendiente); }
-        catch (error) {
-            console.error(error);
-            alert("No se pudo cancelar el recordatorio. Intenta nuevamente: " + error.message);
-            return;
-        }
-    }
-    const { error } = await supabaseClient.from("pendientes")
-        .delete().eq("id", String(id)).eq("user_id", usuarioActual.id);
-    if (error) { alert("No se pudo eliminar el pendiente: " + error.message); return; }
-    pendientes = pendientes.filter(p => p.id !== id);
+function borrarPendiente(id) {
+
+    pendientes =
+        pendientes.filter(p => p.id !== id);
+
     guardarDatos();
+
     renderizar();
 }
 
@@ -654,6 +565,8 @@ function crearPendiente(p) {
             <div class="texto">${escapar(p.texto)}</div>
             ${hora}
         </div>
+
+        <button class="editar" onclick="editarPendiente(${p.id})">Editar</button>
 
         <button
             class="borrar"
