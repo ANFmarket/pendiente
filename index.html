@@ -264,6 +264,9 @@
     ">
     🔔 Activar recordatorios
 </button>
+<button id="btnPaloma" type="button" onclick="activarPaloma()" style="width:100%;border:0;background:#f0f4f9;color:#007aff;padding:13px;border-radius:13px;margin-top:10px;font-size:15px;font-weight:600;cursor:pointer">🕊️ Activar y probar arrullo</button>
+<div id="estadoPaloma" role="status" style="font-size:12px;color:#777;margin:8px 3px">Sonido con la app visible. Toca el botón cada vez que la abras.</div>
+<div id="avisoPaloma" role="status" style="display:none;background:#f0f4f9;padding:14px;border-radius:12px;margin-top:12px;overflow-wrap:anywhere"></div>
 <div class="finalizados-titulo">
         Finalizados de hoy
     </div>
@@ -623,6 +626,114 @@ function renderizar() {
         finalizados.appendChild(crearPendiente(p));
     });
 }
+
+// Arrullo sintetizado: no utiliza grabaciones ni descarga archivos de audio.
+let audioPaloma = null;
+let palomaActiva = false;
+let inicioPaloma = Date.now();
+let ultimoArrullo = -Infinity;
+const avisosPaloma = new Set();
+const CLAVE_AVISOS_PALOMA = "pendiente_avisos_paloma_v1";
+try {
+    const previos = JSON.parse(localStorage.getItem(CLAVE_AVISOS_PALOMA) || "[]");
+    if (Array.isArray(previos)) previos.slice(-200).forEach(k => avisosPaloma.add(k));
+} catch (_) { /* El audio sigue funcionando si no se puede leer el historial. */ }
+
+function estadoSonidoPaloma() {
+    const lista = palomaActiva && audioPaloma?.state === "running";
+    document.getElementById("btnPaloma").textContent = lista
+        ? "🕊️ Probar arrullo / desactivar" : "🕊️ Activar y probar arrullo";
+    document.getElementById("estadoPaloma").textContent = lista
+        ? "Arrullo activado mientras la app esté visible. Para apagarlo, toca el botón."
+        : "Sonido con la app visible. Toca el botón para activarlo.";
+}
+
+function arrullarPaloma() {
+    if (!palomaActiva || document.visibilityState !== "visible" || audioPaloma?.state !== "running") return false;
+    const ahora = audioPaloma.currentTime;
+    if (ahora - ultimoArrullo < 3) return true; // Agrupa avisos simultáneos.
+    ultimoArrullo = ahora;
+    // Dos frases graves, con portamento y vibrato suave: cu-cu-ru-cú.
+    for (let frase = 0; frase < 2; frase++) {
+        const notas = [[0, .32, 390, 340], [.43, .62, 450, 330], [1.12, .32, 350, 300]];
+        for (const [offset, duracion, agudo, grave] of notas) {
+            const t = ahora + .03 + frase * 1.65 + offset;
+            const voz = audioPaloma.createOscillator();
+            const volumen = audioPaloma.createGain();
+            const vibrato = audioPaloma.createOscillator();
+            const profundidad = audioPaloma.createGain();
+            voz.type = "sine";
+            voz.frequency.setValueAtTime(agudo, t);
+            voz.frequency.exponentialRampToValueAtTime(grave, t + duracion);
+            vibrato.frequency.value = 22;
+            profundidad.gain.value = 5;
+            vibrato.connect(profundidad);
+            profundidad.connect(voz.frequency);
+            volumen.gain.setValueAtTime(0, t);
+            volumen.gain.linearRampToValueAtTime(.22, t + .045);
+            volumen.gain.exponentialRampToValueAtTime(.001, t + duracion);
+            voz.connect(volumen);
+            volumen.connect(audioPaloma.destination);
+            voz.onended = () => { voz.disconnect(); volumen.disconnect(); vibrato.disconnect(); profundidad.disconnect(); };
+            voz.start(t); vibrato.start(t);
+            voz.stop(t + duracion + .02); vibrato.stop(t + duracion + .02);
+        }
+    }
+    return true;
+}
+
+async function activarPaloma() {
+    const boton = document.getElementById("btnPaloma");
+    if (boton.disabled) return;
+    if (palomaActiva && audioPaloma?.state === "running") {
+        palomaActiva = false;
+        await audioPaloma.suspend();
+        estadoSonidoPaloma();
+        return;
+    }
+    boton.disabled = true;
+    try {
+        const Contexto = window.AudioContext || window.webkitAudioContext;
+        if (!Contexto) throw new Error("Este navegador no permite reproducir el arrullo.");
+        if (!audioPaloma) {
+            audioPaloma = new Contexto();
+            audioPaloma.onstatechange = estadoSonidoPaloma;
+        }
+        await audioPaloma.resume();
+        if (audioPaloma.state !== "running") throw new Error("Vuelve a tocar el botón para habilitar el audio.");
+        palomaActiva = true;
+        inicioPaloma = Date.now();
+        arrullarPaloma();
+        estadoSonidoPaloma();
+    } catch (error) {
+        palomaActiva = false;
+        estadoSonidoPaloma();
+        document.getElementById("estadoPaloma").textContent = error.message;
+    } finally { boton.disabled = false; }
+}
+
+function revisarAvisosPaloma(ahora = Date.now()) {
+    if (!palomaActiva || audioPaloma?.state !== "running" || document.visibilityState !== "visible") return;
+    const vencidos = pendientes.filter(p => {
+        if (p.terminado || !p.aviso) return false;
+        const fecha = new Date(p.aviso).getTime();
+        const clave = `${p.id}|${p.aviso}`;
+        return Number.isFinite(fecha) && fecha >= inicioPaloma && fecha <= ahora
+            && ahora - fecha < 90000 && !avisosPaloma.has(clave);
+    });
+    if (!vencidos.length || !arrullarPaloma()) return;
+    vencidos.forEach(p => avisosPaloma.add(`${p.id}|${p.aviso}`));
+    try { localStorage.setItem(CLAVE_AVISOS_PALOMA, JSON.stringify([...avisosPaloma].slice(-200))); } catch (_) {}
+    const cartel = document.getElementById("avisoPaloma");
+    cartel.textContent = "🕊️ Recordatorio: " + vencidos.map(p => p.texto).join(" · ");
+    cartel.style.display = "block";
+}
+setInterval(revisarAvisosPaloma, 1000);
+document.addEventListener("visibilitychange", () => {
+    // Al regresar, no reproduce de golpe los avisos vencidos con la app oculta.
+    inicioPaloma = Date.now();
+    estadoSonidoPaloma();
+});
 
 mostrarFecha();
 renderizar();
