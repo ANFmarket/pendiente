@@ -479,7 +479,30 @@ async function guardarPendiente() {
                 const { data, error } = await consulta.eq("id", recordatorioId)
                     .eq("user_id", user.id).select("id");
                 if (error) throw error;
-                if (!data.length) throw new Error("No se pudo actualizar el aviso. Intenta de nuevo.");
+                if (!data?.length) {
+                    // El ID puede pertenecer a una sesión anónima anterior.
+                    // No se puede actualizar ni eliminar un aviso ajeno a la sesión actual.
+                    // Conservamos la edición del texto local, pero NO afirmamos haber
+                    // actualizado el aviso remoto ni creamos duplicados silenciosamente.
+                    if (aviso) {
+                        if (!endpoint) {
+                            const registro = await navigator.serviceWorker.ready;
+                            const suscripcion = await registro.pushManager.getSubscription();
+                            if (!suscripcion) throw new Error("Activa los recordatorios en este dispositivo.");
+                            endpoint = suscripcion.endpoint;
+                        }
+                        const nuevo = await supabaseClient.from("recordatorios").insert({
+                            texto, endpoint, fecha_aviso: new Date(aviso).toISOString(),
+                            user_id: user.id, enviado: false
+                        }).select("id").single();
+                        if (nuevo.error) throw nuevo.error;
+                        recordatorioId = nuevo.data.id;
+                        alert("Se registró un aviso nuevo. Si el aviso anterior pertenece a otra sesión, podría seguir activo.");
+                    } else {
+                        recordatorioId = null;
+                        alert("El aviso anterior no se pudo cancelar en el servidor. Podría seguir activo.");
+                    }
+                }
                 if (!aviso) recordatorioId = null;
             } else if (aviso) {
                 const { data, error } = await supabaseClient.from("recordatorios").insert({
