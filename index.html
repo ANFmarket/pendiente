@@ -264,7 +264,7 @@
     ">
     🔔 Activar recordatorios
 </button>
-<button id="btnPaloma" type="button" onclick="activarPaloma()" style="width:100%;border:0;background:#f0f4f9;color:#007aff;padding:13px;border-radius:13px;margin-top:10px;font-size:15px;font-weight:600;cursor:pointer">🕊️ Activar y probar arrullo</button>
+<button id="btnPaloma" type="button" onclick="activarPaloma()" style="width:100%;border:0;background:#f0f4f9;color:#007aff;padding:13px;border-radius:13px;margin-top:10px;font-size:15px;font-weight:600;cursor:pointer">🔇 Sonido desactivado</button>
 <div id="estadoPaloma" role="status" style="font-size:12px;color:#777;margin:8px 3px">Sonido con la app visible. Toca el botón cada vez que la abras.</div>
 <div id="avisoPaloma" role="status" style="display:none;background:#f0f4f9;padding:14px;border-radius:12px;margin-top:12px;overflow-wrap:anywhere"></div>
 <div class="finalizados-titulo">
@@ -642,7 +642,7 @@ try {
 function estadoSonidoPaloma() {
     const lista = palomaActiva && audioPaloma?.state === "running";
     document.getElementById("btnPaloma").textContent = lista
-        ? "🕊️ Probar arrullo / desactivar" : "🕊️ Activar y probar arrullo";
+        ? "🕊️ Sonido activado" : "🔇 Sonido desactivado";
     document.getElementById("estadoPaloma").textContent = lista
         ? "Arrullo activado mientras la app esté visible. Para apagarlo, toca el botón."
         : "Sonido con la app visible. Toca el botón para activarlo.";
