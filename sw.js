@@ -1,8 +1,8 @@
-const CACHE_NAME = "pendiente-v3";
+const CACHE_NAME = "pendiente-v4";
 
 const ARCHIVOS = [
     "./manifest.json",
-    "./icon-512.png"
+    "./icon-512.png", "./firma-anf.png"
 ];
 
 self.addEventListener("install", event => {
